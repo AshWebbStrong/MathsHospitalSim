@@ -1,0 +1,24 @@
+{
+  "name": "hospital-math-sim",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc && node ./server/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.10",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "cloudinary": "^2.7.0",
+    "colyseus": "^0.16.4",
+    "express": "^5.1.0",
+    "firebase": "^11.10.0"
+  }
+}
