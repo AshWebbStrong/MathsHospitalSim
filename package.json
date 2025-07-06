@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "npm run build && node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -15,11 +15,11 @@
     "cloudinary": "^2.7.0",
     "colyseus": "^0.16.4",
     "express": "^5.1.0",
-    "firebase": "^11.10.0",
-    "@types/express": "^5.0.3",
-    "@types/node": "^24.0.10"
+    "firebase": "^11.10.0"
   },
   "devDependencies": {
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.10"
   }
 }
