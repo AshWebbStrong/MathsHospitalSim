@@ -15,11 +15,11 @@
     "cloudinary": "^2.7.0",
     "colyseus": "^0.16.4",
     "express": "^5.1.0",
-    "firebase": "^11.10.0"
+    "firebase": "^11.10.0",
+    "@types/node": "^24.0.10",
+    "@types/express": "^5.0.3"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
-    "@types/express": "^5.0.3",
-    "@types/node": "^24.0.10"
+    "typescript": "^5.8.3"
   }
 }
