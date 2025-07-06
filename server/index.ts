@@ -4,8 +4,8 @@ import http from 'http';
 
 const app = express();
 
-app.get('/', (req, res) => {
-  res.send('Hello from the Hospital Math Sim backend!');
+app.get('/', (req: express.Request, res: express.Response) => {
+  res.send('Hello from Hospital Math Sim!');
 });
 
 const server = http.createServer(app);
