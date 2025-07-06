@@ -1,6 +1,7 @@
 {
   "name": "hospital-math-sim",
   "version": "1.0.0",
+  "description": "A multiplayer co-op hospital simulation game",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -10,16 +11,15 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
-  "devDependencies": {
-    "@types/express": "^5.0.3",
-    "@types/node": "^24.0.10",
-    "typescript": "^5.8.3"
-  },
   "dependencies": {
     "cloudinary": "^2.7.0",
     "colyseus": "^0.16.4",
     "express": "^5.1.0",
-    "firebase": "^11.10.0"
+    "firebase": "^11.10.0",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.10"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
   }
 }
