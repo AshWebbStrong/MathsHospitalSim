@@ -5,22 +5,30 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "npm run build && node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@colyseus/schema": "^3.0.42",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "cloudinary": "^2.7.0",
     "colyseus": "^0.16.4",
+    "colyseus.js": "^0.16.19",
+    "cors": "^2.8.5",
     "express": "^5.1.0",
-    "firebase": "^11.10.0"
+    "firebase": "^11.10.0",
+    "phaser": "^3.90.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.10",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
     "typescript": "^5.8.3"
   }
-  
 }
