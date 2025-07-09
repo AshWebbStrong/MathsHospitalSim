@@ -1,6 +1,6 @@
 // RoomContext.tsx
 import React, { createContext, useContext, useState } from 'react';
-import type { HospitalState } from '../types/HospitalTypes';
+import { HospitalState, PlayerSchema } from '../../../common/HospitalState';
 import * as Colyseus from 'colyseus.js';
 
 type RoomType = Colyseus.Room<HospitalState> | null;

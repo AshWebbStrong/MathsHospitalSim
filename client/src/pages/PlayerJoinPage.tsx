@@ -25,7 +25,7 @@ export default function PlayerJoinPage() {
 
       const { room: joinedRoom } = await joinHospitalRoom(playerName, internalRoomId, 'player');
       setRoom(joinedRoom);
-      navigate('/game');
+      navigate('/lobby');
     } catch (e) {
       alert('Failed to join room. Please try again.');
     }
@@ -49,7 +49,11 @@ export default function PlayerJoinPage() {
       <input
         placeholder="Your name"
         value={playerName}
-        onChange={(e) => setPlayerName(e.target.value)}
+        onChange={(e) => {
+          const raw = e.target.value.toUpperCase();          // Always uppercase
+          const clean = raw.replace(/[^A-Z]/g, '').slice(0, 7); // Only A–Z, max 7 chars
+          setPlayerName(clean);
+        }}
       />
       <input
         placeholder="Room code (e.g., ABC12)"

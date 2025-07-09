@@ -1,5 +1,5 @@
 import * as Colyseus from 'colyseus.js';
-import type { HospitalState, Player } from '../types/HospitalTypes';
+import { HospitalState, PlayerSchema } from '../../../common/HospitalState';
 
 const client = new Colyseus.Client('ws://localhost:2567'); // replace with env for prod
 
@@ -23,13 +23,22 @@ export const findRoomIdByCode = async (roomCode: string): Promise<string | null>
     playerName: string,
     roomId?: string,
     role: 'host' | 'player' = 'player',
-    roomCode?: string // ✅ Add roomCode only for host
+    roomCode?: string, // ✅ Add roomCode only for host
+    maxPlayers: number = 4, // ✅ NEW: default to 4
   ) => {
     
-    try {
-      const room: Colyseus.Room<HospitalState> = roomId
-        ? await client.joinById<HospitalState>(roomId, { name: playerName, role })
-        : await client.create<HospitalState>('hospital_room', { name: playerName, role, roomCode });
+   try {
+    const room: Colyseus.Room<HospitalState> = roomId
+      ? await client.joinById<HospitalState>(roomId, {
+          name: playerName,
+          role
+        })
+      : await client.create<HospitalState>('hospital_room', {
+          name: playerName,
+          role,
+          roomCode,
+          maxPlayers // ✅ Include maxPlayers when creating the room
+        });
 
       return { room };
     } catch (e) {

@@ -6,6 +6,9 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
+        /* Required for Colyseus Schema decorators */
+    "experimentalDecorators": true,              // ✅ Add this
+    "emitDecoratorMetadata": true,  
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -23,5 +26,9 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "../common"            // ✅ Include shared schema folder
+  ]
+  
 }

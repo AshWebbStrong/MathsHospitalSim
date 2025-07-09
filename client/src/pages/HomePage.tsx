@@ -14,7 +14,7 @@ export default function HomePage() {
 
         const { room } = await joinHospitalRoom('Host', undefined, 'host', generatedCode);
         setRoom(room);
-        navigate('/host', { state: { roomCode: generatedCode} }); // 👈 pass roomCode via router state
+        navigate('/lobby', { state: { roomCode: generatedCode} }); // 👈 pass roomCode via router state
 
 
     } catch (e) {

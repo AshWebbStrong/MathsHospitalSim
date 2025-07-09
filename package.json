@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "dev": "tsx server/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -22,13 +23,16 @@
     "firebase": "^11.10.0",
     "phaser": "^3.90.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.10",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^4.6.0",
+    "tsx": "^4.20.3",
     "typescript": "^5.8.3"
   }
 }
