@@ -1,45 +1,54 @@
 // server/rooms/HospitalRoom.ts
 
 import { Room, Client } from "colyseus";
-import { HospitalState, PlayerSchema } from "../../common/HospitalState";
+import { v4 as uuidv4 } from "uuid";
+import { HospitalState, PlayerSchema, PatientSchema } from "../../common/HospitalState";
+import { HospitalEngine } from "../engine/HospitalEngine";
 import { registerAllHandlers } from "./handlers";
 
 /**
  * The Colyseus Room handling all logic for a single hospital game session.
- * We delegate domain-specific message handlers to modules under ./handlers,
- * and keep join/leave/business logic here.
  */
 export class HospitalRoom extends Room<HospitalState> {
+
+  public engine!: HospitalEngine;
   /** Session ID of the host client; used for host-only checks. */
   hostClientId: string | null = null;
 
-  /**
-   * onCreate is called once when the room is first instantiated.
-   * Here we set metadata, initialize state, and wire up message handlers.
-   */
+   /** onCreate is called once when the room is first instantiated. Here we set metadata, initialize state, and wire up message handlers. */
+   
   onCreate(options: any) {
     console.log("🛠 Room creation options:", options);
 
-    // ─── 1) Metadata ─────────────────────────────────────────────────────
     // Public roomCode for clients to share, and maxPlayers for lobby limit.
     const roomCode   = options.roomCode   || this.roomId;
     const maxPlayers = options.maxPlayers ?? 4;
     this.setMetadata({ roomCode, maxPlayers });
 
-    // ─── 2) Initialize State ─────────────────────────────────────────────
     // Creates a fresh HospitalState, including the embedded HospitalSchema.
     this.state = new HospitalState();
     console.log(`✅ HospitalRoom created (code=${roomCode}, maxPlayers=${maxPlayers})`);
 
-    // ─── 3) Register Message Handlers ────────────────────────────────────
-    // Delegates onMessage registrations to separate modules (e.g. set_hospital_name, start_game).
+
+    // 1) Spin-up the engine
+    this.engine = new HospitalEngine(this.state, /* tickRateMs= */ 1000);
+
+
+    // 2) Delegates onMessage registrations to separate modules (e.g. set_hospital_name, start_game).
     registerAllHandlers(this);
+
+    
+    // 3) When game ends or host stops, call this.engine.stop()
+    this.onMessage("end_game", (c) => {
+      this.broadcast("game_over");
+      this.engine.stop();
+      this.disconnect();
+    });
   }
+
 
   /**
    * onJoin runs whenever a client successfully connects.
-   * We sanitize the player's name, enforce the lobby limit, track host vs player,
-   * and update the doctor count in the shared hospital state.
    */
   onJoin(client: Client, options: any) {
     // — Sanitize & constrain the player name
@@ -79,8 +88,6 @@ export class HospitalRoom extends Room<HospitalState> {
 
   /**
    * onLeave is called whenever a client disconnects or is kicked.
-   * We handle host departure (ending the room) and player departure,
-   * removing them from state and updating counts.
    */
   onLeave(client: Client, consented: boolean) {
     const player = this.state.players.get(client.sessionId);
@@ -111,10 +118,27 @@ export class HospitalRoom extends Room<HospitalState> {
       .filter(p => !p.isHost).length;
   }
 
+
+  public _nextPatientEventId?: string;
+  public generatePatient() {
+    const p = new PatientSchema();
+    p.id     = uuidv4();
+    p.name   = `Patient ${p.id.slice(0,4)}`;
+    p.age    = Math.floor(Math.random() * 60) + 20;
+    p.gender = Math.random() < 0.5 ? "male" : "female";
+
+    p.location = "triage";
+
+    this.state.hospital.patients.push(p);
+    this.state.hospital.numPatients++;
+    console.log(`➕ [Engine] New patient: ${p.name}`);
+  }
+
   /**
    * onDispose is called when the room is cleaned up (after host leaves).
    */
   onDispose() {
+    this.engine.stop();
     console.log("🗑️ HospitalRoom disposed");
   }
 }

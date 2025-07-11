@@ -12,6 +12,7 @@ function App() {
 
 
   return (
+    <div className="h-full flex flex-col">  {/* ← must be h-full */}
       <Router>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -21,6 +22,7 @@ function App() {
           <Route path="/host-game" element={<HostGamePage />} />
         </Routes>
       </Router>
+      </div>
     );
 }
 

@@ -1,11 +1,9 @@
 // server/rooms/handlers/gameStart.ts
+import { v4 as uuidv4 } from "uuid";
 import type { HospitalRoom } from "../HospitalRoom";
 
-/**
- * Handles the host's "start_game" message, triggering the 3s countdown
- * and initializing hospital stats when it completes.
- */
 export function registerGameStartHandlers(room: HospitalRoom) {
+
   room.onMessage("start_game", (client) => {
     const player = room.state.players.get(client.sessionId);
     if (!player?.isHost || room.state.gameStarted) {
@@ -16,17 +14,36 @@ export function registerGameStartHandlers(room: HospitalRoom) {
     room.state.gameStarting = true;
 
     setTimeout(() => {
-      // initialize counts
-      room.state.hospital.numDoctors = Array
+      // ── initialize stats ─────────────────────
+      room.state.hospital.numDoctors       = Array
         .from(room.state.players.values())
         .filter(p => !p.isHost).length;
+      room.state.hospital.numPatients      = 0;
+      room.state.hospital.numDeadPatients  = 0;
+      room.state.hospital.patientSatisfaction = 100;
 
-      room.state.hospital.numPatients     = 0;
-      room.state.hospital.numDeadPatients = 0;
-      room.state.hospital.patientSatisfaction    = 100;
-
+      // ── officially start ─────────────────────
       room.state.gameStarted = true;
       console.log("🎮 Game officially started — hospital stats initialized");
+
+      // ── start your engine ────────────────────
+      room.engine.start();
+
+      // 2) define a named recursive scheduler
+      const scheduleNextPatient = () => {
+        room.generatePatient();
+        // store the new ID so we can cancel it later
+        room._nextPatientEventId = room.engine.schedule(
+          room.state.hospital.patientGenerationInterval,
+          scheduleNextPatient
+        );
+      };
+
+      // 3) schedule the very first run and store its ID
+      room._nextPatientEventId = room.engine.schedule(
+        room.state.hospital.patientGenerationInterval,
+        scheduleNextPatient
+      );
     }, 3000);
   });
 }

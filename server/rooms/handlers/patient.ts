@@ -1,62 +1,61 @@
 // server/rooms/handlers/patient.ts
-import { v4 as uuidv4 } from "uuid";
 import type { HospitalRoom }  from "../HospitalRoom";
-import { PatientSchema } from "../../../common/HospitalState";
 
 export function registerPatientHandlers(room: HospitalRoom) {
-  // Helper: actually instantiate & inject a new patient
-  const generatePatient = () => {
-    const p = new PatientSchema();
-    p.id     = uuidv4();
-    p.name   = `Patient ${p.id.slice(0,4)}`;       // placeholder
-    p.age    = Math.floor(Math.random() * 60) + 20;
-    p.gender = Math.random() < 0.5 ? "male" : "female";
-
-    // push into the shared array & bump the count
-    room.state.hospital.patients.push(p);
-    room.state.hospital.numPatients++;
-    console.log(`➕ New patient generated: ${p.name}`);
-  };
-
   // 1) Manual trigger: host clicks “Generate Patient”
   room.onMessage("generate_patient", (client) => {
     const player = room.state.players.get(client.sessionId);
-    if (!player?.isHost) return;  // only host may
-    generatePatient();
+    if (!player?.isHost) return;  
+    room.generatePatient();
   });
 
-  // 2) Automatic generation on an interval
-  const intervalKey = Symbol("patientInterval");
-
-  const startAutoGen = (intervalMs: number) => {
-    // clear any existing
-    const prev = (room as any)[intervalKey];
-    if (prev) clearInterval(prev);
-
-    // set new
-    (room as any)[intervalKey] = setInterval(generatePatient, intervalMs);
-    console.log(`⏱️ Auto-patient generation every ${intervalMs}ms`);
-  };
-
-  // a) allow host to update the interval dynamically
+  // 2) Let host update the interval while still in lobby
   room.onMessage("set_patient_interval", (client, { interval }: { interval: number }) => {
     const player = room.state.players.get(client.sessionId);
     if (!player?.isHost) return;
 
-    // sanitize / enforce a minimum if you like:
+    // enforce minimum
     const ms = Math.max(1000, interval);
     room.state.hospital.patientGenerationInterval = ms;
-    startAutoGen(ms);
+    console.log(`[patient.ts] Host set patientGenerationInterval → ${ms}ms`);
+
+    // If the game has already started, we should reschedule the next generation:
+    if (room.state.gameStarted) {
+      // cancel the pending “next patient” event
+      if (room._nextPatientEventId) {
+        room.engine.cancel(room._nextPatientEventId);
+      }
+      // schedule a fresh one at the new interval
+      room._nextPatientEventId = room.engine.schedule(
+        ms,
+        () => {
+          room.generatePatient();
+          // and re‐schedule recursively
+          room._nextPatientEventId = room.engine.schedule(
+            room.state.hospital.patientGenerationInterval,
+            arguments.callee as any
+          );
+        }
+      );
+      console.log(`[patient.ts] Rescheduled next patient with new interval`);
+    }
   });
 
-  // Start the automatic loop using the default interval in state
-  startAutoGen(room.state.hospital.patientGenerationInterval);
+  // 3) Select a patient when clicking on them
+  room.onMessage("select_patient", (client, { patientId }: { patientId: string }) => {
+    const player = room.state.players.get(client.sessionId);
+    if (!player) return;
 
-  // 3) Cleanup the interval on room dispose
-  const originalOnDispose = room.onDispose.bind(room);
-  room.onDispose = () => {
-    const tid = (room as any)[intervalKey];
-    if (tid) clearInterval(tid);
-    originalOnDispose();
-  };
+    console.log(`👨‍⚕️ Player ${player.name} wants to triage patient ${patientId}`);
+    // TODO: validate patient exists, change its state, broadcast updates, etc.
+    // For now we’ll just log it so the socket stays open.
+  });
+
+  // 4) Transport a patient when clicking on a new room for them)
+    room.onMessage("transfer_patient", (client, { patientId, location }) => {
+    const patient = room.state.hospital.patients.find(p => p.id === patientId);
+    if (!patient) return;
+    console.log(`↔️ Moving ${patientId} → ${location}`);
+    patient.location = location;
+  });
 }

@@ -49,6 +49,7 @@ export class PatientSchema extends Schema {
  */
 export class HospitalSchema extends Schema {
   @type("string") name: string           = "My Hospital";
+  @type("string") dangerCode: string     = "Green";    // add hospital danger code
   @type("number") numDoctors: number     = 0;
   @type("number") numPatients: number    = 0;
   @type("number") numDeadPatients: number= 0;
